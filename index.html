@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Streamer Topic AI</title>
+    
+    <!-- Fontes do Google -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --bg-color: #09090b; /* Preto suave */
+            --card-bg: rgba(20, 20, 30, 0.7);
+            --primary: #0ea5e9; /* Ciano Neon */
+            --secondary: #d946ef; /* Roxo Neon */
+            --text-main: #f8fafc;
+            --text-dim: #94a3b8;
+            --glass-border: rgba(255, 255, 255, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(14, 165, 233, 0.15) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(217, 70, 239, 0.15) 0%, transparent 40%);
+            font-family: 'Poppins', sans-serif;
+            color: var(--text-main);
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        /* Container Principal */
+        .app-container {
+            width: 90%;
+            max-width: 800px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Efeito de Vidro (Glassmorphism) */
+        .glass-panel {
+            background: var(--card-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 2rem;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            transition: box-shadow 0.3s ease;
+        }
+
+        .glass-panel:hover {
+            box-shadow: 0 0 20px rgba(14, 165, 233, 0.2);
+        }
+
+        /* Header e Título */
+        h1 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.5rem;
+            letter-spacing: 2px;
+            color: var(--primary);
+            text-transform: uppercase;
+            margin-bottom: 2rem;
+            text-shadow: 0 0 10px rgba(14, 165, 233, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .badge {
+            font-size: 0.7rem;
+            background: rgba(217, 70, 239, 0.2);
+            color: var(--secondary);
+            padding: 2px 8px;
+            border-radius: 4px;
+            border: 1px solid var(--secondary);
+        }
+
+        /* Área da Pergunta */
+        .question-area {
+            min-height: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 2rem;
+            position: relative;
+        }
+
+        #question-text {
+            font-size: 2rem;
+            font-weight: 600;
+            line-height: 1.4;
+            transition: opacity 0.5s ease, transform 0.5s ease;
+        }
+
+        .category-tag {
+            position: absolute;
+            top: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.8rem;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            opacity: 0.8;
+        }
+
+        /* Barra de Progresso */
+        .progress-container {
+            width: 100%;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 2px;
+            margin-bottom: 2rem;
+            overflow: hidden;
+        }
+
+        #progress-bar {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            box-shadow: 0 0 10px var(--primary);
+            transition: width 0.1s linear;
+        }
+
+        /* Controles */
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+        }
+
+        button {
+            border: none;
+            outline: none;
+            cursor: pointer;
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 700;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), #0284c7);
+            color: white;
+            box-shadow: 0 0 15px rgba(14, 165, 233, 0.4);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 25px rgba(14, 165, 233, 0.6);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            border: 1px solid var(--glass-border);
+            color: var(--text-dim);
+        }
+
+        .btn-secondary:hover {
+            color: var(--text-main);
+            border-color: var(--text-main);
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .btn-icon {
+            padding: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Modal de Configurações */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(5px);
+            z-index: 10;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .settings-modal {
+            background: #18181b;
+            width: 90%;
+            max-width: 500px;
+            padding: 2rem;
+            border-radius: 16px;
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 0 50px rgba(0, 0, 0, 0.5);
+        }
+
+        .settings-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            color: var(--primary);
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        .setting-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .setting-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--text-dim);
+            font-size: 0.9rem;
+        }
+
+        input[type="number"] {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--glass-border);
+            color: white;
+            padding: 10px;
+            border-radius: 8px;
+            width: 100%;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .theme-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .checkbox-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .checkbox-wrapper:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .checkbox-wrapper input {
+            accent-color: var(--secondary);
+            transform: scale(1.2);
+        }
+
+        /* Utilitários de Animação */
+        .fade-out {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+
+        .pulse {
+            animation: pulse-glow 2s infinite;
+        }
+
+        @keyframes pulse-glow {
+            0% { box-shadow: 0 0 0 0 rgba(14, 165, 233, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(14, 165, 233, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(14, 165, 233, 0); }
+        }
+
+        /* Mobile */
+        @media (max-width: 600px) {
+            #question-text { font-size: 1.4rem; }
+            .controls { flex-wrap: wrap; }
+            .btn-primary { width: 100%; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        <div class="glass-panel">
+            <h1>Stream Topic <span class="badge">AI-V1</span></h1>
+
+            <div class="question-area">
+                <span class="category-tag" id="current-category">Aguardando Início...</span>
+                <div id="question-text">Clique em "Iniciar" para gerar tópicos para sua live.</div>
+            </div>
+
+            <div class="progress-container">
+                <div id="progress-bar"></div>
+            </div>
+
+            <div class="controls">
+                <button id="btn-toggle" class="btn-primary pulse" onclick="toggleTimer()">Iniciar</button>
+                <button class="btn-secondary" onclick="generateNow()">Pular / Próximo</button>
+                <button class="btn-secondary btn-icon" onclick="openSettings()" title="Configurações">
+                    ⚙️
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Configurações -->
+    <div class="modal-overlay" id="settings-modal">
+        <div class="settings-modal">
+            <div class="settings-header">
+                <h2>Configuração</h2>
+                <span style="cursor:pointer; color: white;" onclick="closeSettings()">✕</span>
+            </div>
+
+            <div class="setting-group">
+                <label>Intervalo (segundos)</label>
+                <input type="number" id="interval-input" value="60" min="10" max="600">
+            </div>
+
+            <div class="setting-group">
+                <label>Temas Ativos</label>
+                <div class="theme-grid">
+                    <label class="checkbox-wrapper">
+                        <input type="checkbox" checked value="gaming"> Gaming
+                    </label>
+                    <label class="checkbox-wrapper">
+                        <input type="checkbox" checked value="pessoal"> Pessoal / Vida
+                    </label>
+                    <label class="checkbox-wrapper">
+                        <input type="checkbox" checked value="hipotetico"> Hipotético
+                    </label>
+                    <label class="checkbox-wrapper">
+                        <input type="checkbox" checked value="chat"> Interação Chat
+                    </label>
+                    <label class="checkbox-wrapper">
+                        <input type="checkbox" value="polemica"> Polêmica Leve
+                    </label>
+                    <label class="checkbox-wrapper">
+                        <input type="checkbox" value="nostalgia"> Nostalgia
+                    </label>
+                </div>
+            </div>
+
+            <button class="btn-primary" style="width: 100%;" onclick="saveSettings()">Salvar & Fechar</button>
+        </div>
+    </div>
+
+    <script>
+        // --- BASE DE DADOS "IA" SIMULADA ---
+        const database = {
+            gaming: [
+                "Qual foi o jogo que mais te fez passar raiva, mas você não conseguia parar?",
+                "Se você pudesse viver dentro de qualquer jogo por 1 mês, qual seria?",
+                "Qual a mecânica de jogo mais inútil que já inventaram?",
+                "Top 3 chefes de jogos que você respeita.",
+                "Remake de um jogo antigo ou Sequência de um jogo atual? Qual você prefere?",
+                "Qual NPC você levaria para um churrasco?",
+                "Mouse e Teclado ou Controle? O debate final.",
+                "Qual foi sua maior conquista 'tryhard' nos jogos?",
+                "Um jogo que todo mundo ama e você não vê graça.",
+                "Qual a trilha sonora de jogo que te dá arrepios?"
+            ],
+            pessoal: [
+                "Qual foi a compra mais idiota que você já fez com seu dinheiro?",
+                "Uma comida que você defenderia com a própria vida.",
+                "Se você não fosse streamer, qual seria sua profissão hoje?",
+                "Qual o hábito mais estranho que você tem?",
+                "Conte uma história de 'perrengue chique' que você já passou.",
+                "Qual filme marcou sua infância?",
+                "Se você ganhasse na loteria hoje, qual a primeira coisa que compraria?",
+                "Você prefere frio extremo ou calor extremo?",
+                "Qual sua opinião impopular sobre comida?",
+                "Um medo irracional que você tem."
+            ],
+            hipotetico: [
+                "Sobrevivência Zumbi: Qual a sua arma e quem do chat seria o primeiro a ir de base?",
+                "Se você pudesse ter um superpoder inútil, qual seria?",
+                "Você prefere saber a data da sua morte ou a causa?",
+                "Se alienígenas chegassem, o que você mostraria da Terra para eles?",
+                "Você aceitaria ir para Marte sem passagem de volta?",
+                "Se você pudesse voltar 10 anos no tempo mantendo sua mente atual, o que mudaria?",
+                "Jantar com qualquer pessoa histórica (viva ou morta). Quem seria?",
+                "Se todos os animais pudessem falar, qual seria o mais chato?",
+                "Você prefere lutar contra 1 pato do tamanho de um cavalo ou 100 cavalos do tamanho de patos?"
+            ],
+            chat: [
+                "Chat, qual a nota de 0 a 10 para a gameplay de hoje?",
+                "Peça para o chat definir o dia de hoje com um emote.",
+                "Mods vs Chat: Quem ganharia numa briga de rua?",
+                "Qual o nick mais engraçado que você já viu no chat?",
+                "Se o chat fosse um país, qual seria a lei principal?",
+                "Chat, me recomendem uma música AGORA.",
+                "Faça uma votação rápida: Pizza com ou sem Ketchup?",
+                "Desafio para o chat: Adivinhem o que eu comi hoje.",
+                "Primeira pessoa que digitar 'BATATA' ganha um salve VIP."
+            ],
+            polemica: [
+                "Biscoito ou Bolacha? Vamos brigar.",
+                "Açaí tem gosto de terra ou é divino?",
+                "Spoilers são imperdoáveis ou depende?",
+                "Filmes dublados ou legendados? Justifique sem brigar.",
+                "Pizza de Abacaxi: Crime ou Delícia?",
+                "Redes sociais fizeram bem ou mal para a humanidade?",
+                "Café com açúcar ou sem açúcar?",
+                "Cachorro-quente é sanduíche?"
+            ],
+            nostalgia: [
+                "Qual desenho animado define sua infância?",
+                "Qual a primeira rede social que você usou?",
+                "Você alugava fitas/DVDs? Qual a memória disso?",
+                "Um doce antigo que sumiu do mercado e você sente falta.",
+                "Qual foi seu primeiro celular?",
+                "A internet era melhor antigamente?"
+            ]
+        };
+
+        // --- ESTADO DA APLICAÇÃO ---
+        let config = {
+            interval: 60, // segundos
+            themes: ['gaming', 'pessoal', 'hipotetico', 'chat']
+        };
+
+        let state = {
+            isRunning: false,
+            timerId: null,
+            progressId: null,
+            startTime: 0,
+            remaining: 0
+        };
+
+        // --- DOM ELEMENTS ---
+        const questionText = document.getElementById('question-text');
+        const categoryTag = document.getElementById('current-category');
+        const progressBar = document.getElementById('progress-bar');
+        const btnToggle = document.getElementById('btn-toggle');
+        const modal = document.getElementById('settings-modal');
+
+        // --- LÓGICA PRINCIPAL ---
+
+        function toggleTimer() {
+            if (state.isRunning) {
+                stopTimer();
+            } else {
+                startTimer();
+            }
+        }
+
+        function startTimer() {
+            state.isRunning = true;
+            btnToggle.textContent = "Pausar";
+            btnToggle.classList.remove('pulse');
+            btnToggle.style.background = "linear-gradient(135deg, #ef4444, #991b1b)"; // Vermelho para parar
+
+            // Gera a primeira pergunta imediatamente se for o início absoluto
+            if (questionText.textContent.includes("Clique em")) {
+                generateQuestion();
+            }
+
+            state.startTime = Date.now();
+            
+            // Lógica do Timer
+            runProgressLoop();
+        }
+
+        function stopTimer() {
+            state.isRunning = false;
+            btnToggle.textContent = "Retomar";
+            btnToggle.style.background = ""; // Volta ao original
+            cancelAnimationFrame(state.progressId);
+        }
+
+        function runProgressLoop() {
+            if (!state.isRunning) return;
+
+            const now = Date.now();
+            const elapsed = (now - state.startTime) / 1000; // segundos
+            
+            if (elapsed >= config.interval) {
+                generateQuestion();
+                state.startTime = Date.now(); // Reseta timer
+                progressBar.style.width = '0%';
+            } else {
+                const percentage = (elapsed / config.interval) * 100;
+                progressBar.style.width = `${percentage}%`;
+            }
+
+            state.progressId = requestAnimationFrame(runProgressLoop);
+        }
+
+        function generateNow() {
+            generateQuestion();
+            if (state.isRunning) {
+                state.startTime = Date.now(); // Reseta o timer visual se estiver rodando
+            }
+        }
+
+        function generateQuestion() {
+            // 1. Filtrar temas selecionados
+            const activeThemes = config.themes;
+            
+            if (activeThemes.length === 0) {
+                displayQuestion("Erro", "Selecione pelo menos um tema nas configurações!");
+                return;
+            }
+
+            // 2. Escolher tema aleatório
+            const randomThemeKey = activeThemes[Math.floor(Math.random() * activeThemes.length)];
+            
+            // 3. Escolher pergunta aleatória do tema
+            const questionsList = database[randomThemeKey];
+            const randomQuestion = questionsList[Math.floor(Math.random() * questionsList.length)];
+
+            // 4. Formatar nome do tema
+            const themeNames = {
+                gaming: "🎮 Gaming",
+                pessoal: "👤 Pessoal",
+                hipotetico: "🤔 Hipotético",
+                chat: "💬 Chat Interage",
+                polemica: "🔥 Polêmica",
+                nostalgia: "📺 Nostalgia"
+            };
+
+            displayQuestion(themeNames[randomThemeKey] || "Geral", randomQuestion);
+        }
+
+        function displayQuestion(theme, text) {
+            // Animação de saída
+            questionText.classList.add('fade-out');
+            categoryTag.classList.add('fade-out');
+
+            setTimeout(() => {
+                categoryTag.textContent = theme;
+                questionText.textContent = text;
+                
+                // Animação de entrada
+                questionText.classList.remove('fade-out');
+                categoryTag.classList.remove('fade-out');
+            }, 500);
+        }
+
+        // --- CONFIGURAÇÕES ---
+
+        function openSettings() {
+            modal.classList.add('active');
+            // Carregar valores atuais
+            document.getElementById('interval-input').value = config.interval;
+            
+            // Carregar checkboxes
+            document.querySelectorAll('.theme-grid input').forEach(input => {
+                input.checked = config.themes.includes(input.value);
+            });
+        }
+
+        function closeSettings() {
+            modal.classList.remove('active');
+        }
+
+        function saveSettings() {
+            // Salvar Intervalo
+            const newInterval = parseInt(document.getElementById('interval-input').value);
+            if (newInterval > 5) config.interval = newInterval;
+
+            // Salvar Temas
+            const selectedCheckboxes = document.querySelectorAll('.theme-grid input:checked');
+            const newThemes = Array.from(selectedCheckboxes).map(cb => cb.value);
+            
+            config.themes = newThemes;
+
+            closeSettings();
+            
+            // Se estiver rodando, reseta o ciclo para aplicar o novo tempo
+            if (state.isRunning) {
+                state.startTime = Date.now();
+            }
+        }
+        
+        // Fechar modal clicando fora
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) closeSettings();
+        });
+
+    </script>
+</body>
+</html>
